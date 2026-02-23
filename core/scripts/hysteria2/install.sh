@@ -18,8 +18,19 @@ install_hysteria() {
     openssl ecparam -genkey -name prime256v1 -out ca.key >/dev/null 2>&1
     openssl req -new -x509 -days 36500 -key ca.key -out ca.crt -subj "/CN=$sni" >/dev/null 2>&1
     echo "Downloading geo data..."
-    wget -O /etc/hysteria/geosite.dat https://raw.githubusercontent.com/Chocolate4U/Iran-v2ray-rules/release/geosite.dat >/dev/null 2>&1
-    wget -O /etc/hysteria/geoip.dat https://raw.githubusercontent.com/Chocolate4U/Iran-v2ray-rules/release/geoip.dat >/dev/null 2>&1
+    log_info "Copying local Geo-data files..."
+    
+    # Предполагаем, что файлы лежат в той же папке, откуда запущен скрипт
+    if [ -f "./geoip.dat" ] && [ -f "./geosite.dat" ]; then
+        cp ./geoip.dat /etc/hysteria/geoip.dat
+        cp ./geosite.dat /etc/hysteria/geosite.dat
+        log_success "Geo-data copied from local folder."
+    else
+        log_warning "Local Geo-data not found, attempting download..."
+        wget -O /etc/hysteria/geosite.dat https://raw.githubusercontent.com/Chocolate4U/Iran-v2ray-rules/release/geosite.dat >/dev/null 2>&1
+        wget -O /etc/hysteria/geoip.dat https://raw.githubusercontent.com/Chocolate4U/Iran-v2ray-rules/release/geoip.dat >/dev/null 2>&1
+    fi
+
         
     echo "Generating SHA-256 fingerprint..."
 
