@@ -105,10 +105,18 @@ download_and_extract_release() {
     unzip -q "/tmp/${zip_name}" -d /etc/hysteria
     rm "/tmp/${zip_name}"
 
-    # ПРЯМАЯ ЗАГРУЗКА GEO DATA (чтобы не висло)
-    log_info "Downloading Geo-data files manually..."
-    curl -L -o /etc/hysteria/geoip.dat https://github.com/v2fly/geoip/releases/latest/download/geoip.dat
-    curl -L -o /etc/hysteria/geosite.dat https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat
+    log_info "Copying local Geo-data files..."
+    
+    # Предполагаем, что файлы лежат в той же папке, откуда запущен скрипт
+    if [ -f "./geoip.dat" ] && [ -f "./geosite.dat" ]; then
+        cp ./geoip.dat /etc/hysteria/geoip.dat
+        cp ./geosite.dat /etc/hysteria/geosite.dat
+        log_success "Geo-data copied from local folder."
+    else
+        log_warning "Local Geo-data not found, attempting download..."
+        curl -L -o /etc/hysteria/geoip.dat https://github.com/v2fly/geoip/releases/latest/download/geoip.dat
+        curl -L -o /etc/hysteria/geosite.dat https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat
+    fi
     
     [ -f "/etc/hysteria/core/scripts/auth/user_auth" ] && chmod +x /etc/hysteria/core/scripts/auth/user_auth
 }
